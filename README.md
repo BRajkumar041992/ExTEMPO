@@ -44,7 +44,7 @@ Cell 5 provides the option to plot:
 - the mode amplitude vs radial order for one MC realisation,
 - the echelle diagram for one MC realisation,
 - the synthetic time series generated from ADDG3 for one MC realisation,
-- The RMS amplitude plot with each realisation, the mean realisation, and the initial and estimated nu_max.
+- The RMS amplitude plot with each realisation, the mean realisation, and the estimated nu_max.
 
 Each plot can be toggled on or off, and the user can define which MC realisation they would like to plot.
 
