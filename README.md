@@ -9,7 +9,7 @@ For Sun-like stars, P-mode oscillations occur over a narrow frequency range. The
 
 ExTEMPO is a tool which can be used to develop a p-mode mitigation strategy by optimising the exposure times of radial velocity observations. It uses the stellar parameters such as mass, radius, effective temperature, log luminosity, nu_max and delta_nu to determine the P-mode rms amplitude at different exposure times for solar-like stars (F, G and K stars). ExTEMPO utilises stellar scaling relations and contributions taken from Kjeldsen & Bedding (1994), White et al. (2011), Mosser et al. (2013), Ball et al. (2018) and Nielson et al. (2021), to model the PSD of the p-mode oscillations. The mode data is then fed to the AsteroFLAG Artificial Dataset Generator 3 (AADG3), which simulates a radial velocity time series. The time series is then integrated to obtain the rms amplitude at different exposure times. Monte Carlo (MC) sampling of the input parameters is used to generate multiple realisations of the target star. Each realisation is processed as previously described, producing a distribution of rms amplitude curves from which a one-sigma error is obtained.
 
-ExTEMPO is in active development, so please report any issues/suggestions on GitHub (https://github.com/BRajkumar041992). The first version is in the form of a Jupyter notebook (ExTEMPO_v1.0.ipynb) for easy access. 
+ExTEMPO is in active development, so please report any issues/suggestions on GitHub (https://github.com/BRajkumar041992). The first version is in the form of a Jupyter notebook (ExTEMPO_v1_0.ipynb) for easy access. 
 
 To run ExTEMPO, first ensure the following packages are preinstalled.
 
