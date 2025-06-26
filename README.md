@@ -13,19 +13,7 @@ ExTEMPO is in active development, so please report any issues/suggestions on Git
 
 To run ExTEMPO, first ensure the following packages are preinstalled.
 
-os
-time
-hashlib
-subprocess
-multiprocessing
-concurrent.futures
-numpy
-pandas
-matplotlib
-scipy
-glob
-re
-ADDG3 (https://warrickball.gitlab.io/AADG3/index.html#)
+os, time, hashlib, subprocess, multiprocessing, concurrent.futures ,numpy, pandas, matplotlib, scipy, glob, re and ADDG3 (https://warrickball.gitlab.io/AADG3/index.html#)
 
 ExTEMPO also requires a CSV file containing target stars and their stellar and asteroseismic parameters. The file should contain columns such as primary_name, Teff(K), Teff_err(K), Mass, Mass-err, Mass+err, Radius, Radius-err, Radius+err, logLuminosity, logLuminosity-err, logLuminosity+err, deltanu, deltanu-err, deltanu+err, numax, numax-err, and numax+err. A sample file is provided on GitHub.
 
