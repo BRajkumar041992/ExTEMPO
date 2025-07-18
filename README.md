@@ -5,6 +5,8 @@ When searching for Earth-like planets around F, G, and K-type stars, pressure-mo
 For Sun-like stars, P-mode oscillations occur over a narrow frequency range. They can, therefore, be averaged out to reduce the error in the RV measurements. Chaplin et al. (2019), who used the stellar parameters to estimate the RV amplitude, observed that the P-mode signal does not monotonically decrease with time, further emphasising the need to determine the optimal exposure time to remove the P-mode noise.
 
 **Exposure Time Evaluation for Mitigation of P-mode Oscillations (ExTEMPO)**
+![Project Logo](extempo_logo.png)
+
 
 ExTEMPO is a tool which can be used to develop a p-mode mitigation strategy by optimising the exposure times of radial velocity observations. It uses the stellar parameters such as mass, effective temperature, and log luminosity to determine the P-mode rms amplitude at different exposure times for solar-like stars (F, G and K stars). ExTEMPO utilises stellar scaling relations and contributions taken from Kjeldsen & Bedding (1994), White et al. (2011), Mosser et al. (2013), Ball et al. (2018) and Nielson et al. (2021), to model the PSD of the p-mode oscillations. The mode data is then fed to the AsteroFLAG Artificial Dataset Generator 3 (AADG3), which simulates a radial velocity time series. The time series is then integrated to obtain the rms amplitude at different exposure times. Monte Carlo (MC) sampling of the input parameters is used to generate multiple realisations of the target star. Each realisation is processed as previously described, producing a distribution of rms amplitude curves from which a one-sigma error is obtained.
 
