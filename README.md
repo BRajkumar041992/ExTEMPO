@@ -11,7 +11,7 @@ ExTEMPO is a tool which can be used to develop a p-mode mitigation strategy by o
 
 ExTEMPO is in active development, so please report any issues or suggestions on GitHub (https://github.com/BRajkumar041992). The latest version is currently available as a Python module (ExTEMPO_v2_0) from the GitHub repository. 
 
-To run ExTEMPO, ensure the following packages are preinstalled.
+To run ExTEMPO, please make sure the following packages are preinstalled.
 
 matplotlib, numpy, pandas, scipy, and ADDG3 (https://warrickball.gitlab.io/AADG3/index.html#)
 
@@ -27,7 +27,7 @@ The 3rd cell requires user input. A description of each input is included. Once 
 - a .asc file, the output of ADDG3, which contains the simulated time series.
 - a .npz file, which contains the rms amplitudes and exposure times for each realisation, the mean rms amplitude plot and its errors.
 
-This store between 8-10 GB of data. (Future updates will include an option to only save the final results.)
+This stores between 8-10 GB of data per star. (Future updates will include an option to only save the final results.)
 
 Cell 5 provides the option to plot:
 
