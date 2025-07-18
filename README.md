@@ -5,6 +5,7 @@ When searching for Earth-like planets around F, G, and K-type stars, pressure-mo
 For Sun-like stars, P-mode oscillations occur over a narrow frequency range. They can, therefore, be averaged out to reduce the error in the RV measurements. Chaplin et al. (2019), who used the stellar parameters to estimate the RV amplitude, observed that the P-mode signal does not monotonically decrease with time, further emphasising the need to determine the optimal exposure time to remove the P-mode noise.
 
 **Exposure Time Evaluation for Mitigation of P-mode Oscillations (ExTEMPO)**
+
 <img src="ExTEMPO_logo.png" alt="Logo" width="200"/>
 
 
