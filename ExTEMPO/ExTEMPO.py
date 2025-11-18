@@ -18,7 +18,6 @@ from matplotlib.lines import Line2D
 from multiprocessing import Pool
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 
-
 def load_sample_subset(filepath):
     """ 
     Load a stellar sample from a CSV file and extract relevant columns.
@@ -34,8 +33,7 @@ def load_sample_subset(filepath):
         DataFrame containing only the selected columns.
     
     """
-        
-    # Define the columns to extract
+    
     columns = [
         'primary_name', 'Mass', 'Teff(K)',
         'Mass-err', 'Mass+err', 'Teff_err(K)',
@@ -46,22 +44,18 @@ def load_sample_subset(filepath):
     sample = pd.read_csv(filepath)
     return sample[columns]
 
-#---------------------------------------------------#
-
-def create_dir(ID,base_path):
+def create_dir(ID):
     """
     Creates a directory named after the star ID if it does not already exist.
     
     """
-    base_dir = os.path.join(base_path, ID)
+    base_dir = os.path.join(f'./{ID}')
     
     try:
         os.makedirs(base_dir, exist_ok=True)
         print(f"Directory '{base_dir}' created (or already exists).")
     except Exception as e:
         print(f"An error occurred while creating directory: {e}")
-
-#---------------------------------------------------#
 
 class model():
     """ 
@@ -103,7 +97,7 @@ class model():
         a_MS = 0.57 #Mosser et al. 2013
         
         n_p_max = numax / dnu
-        alpha_p = 2 * a_MS * n_max**(-2)  #Mosser et al. 2013
+        alpha_p = 2 * a_MS * n_max**-2  #Mosser et al. 2013
 
         return (self.N_p + eps_p + alpha_p/2*(self.N_p - n_p_max)**2) * dnu
         
@@ -151,14 +145,12 @@ class model():
         """
         
         A_max_sun = 0.234           # +/- 0.014 m/s velocity Amplitude of Sun (Kjeldsen & Bedding 1994)
-        #A_max_sun = 0.19             # Chaplin et al 2019
         Tau_sun = 2.88              #days (mode lifetime of Sun Kjeldsen & Bedding 2011)
         L_sun = M_sun = 1           #Solar luminosity and mass in solar units
         T_sun = 5777                #Solar effective temperature in Kelvin
-        Tau = Tau_sun * (T/T_sun) ** (-3.7)     #Chaplin et al 2009
+        Tau = Tau_sun * (T/T_sun) ** -3.7     #Chaplin et al 2009
 
-        #A_max = A_max_sun * ((L/L_sun) / (M/M_sun))
-        A_max = A_max_sun * ((L/L_sun * (Tau/Tau_sun) ** 0.5 ) / (((M/M_sun) ** 1.5) * ((T/T_sun) ** 2.25)))   #Kjeldsen & Bedding 2011
+        A_max = A_max_sun * ((L/L_sun * (Tau/Tau_sun) ** 0.5 ) / (((M/M_sun) ** 1.5) * ((T/T_sun) ** 2.25))) 
         return A_max
     
 
@@ -368,8 +360,6 @@ class model():
 
         return mode_data, modes
     
-#---------------------------------------------------#
-
 def generate_seed_hash(M, T_eff, numax):
     """
     Generates a reproducible integer seed based on M, T_eff, and numax
@@ -382,8 +372,6 @@ def generate_seed_hash(M, T_eff, numax):
     # Uses the first 8 characters of the hash as a base-16 integer
     seed = int(h[:8], 16) % (2**31 - 1)  # ensures it's in 32-bit integer range
     return seed
-
-#---------------------------------------------------#
 
 def to_fortran_d0(val):
     """
@@ -410,60 +398,7 @@ def to_fortran_d0(val):
     except ValueError:
         return val_str  # Return as is if not convertible
     
-#---------------------------------------------------#
-
-def compute_tau(T_eff, R, M):
-    """
-    Calculate the granulation timescale (tau) in seconds using the scaling relation from Basu and Chaplin, 2018.
-    
-    Parameters:
-        T (float): Effective temperature in Kelvin.
-        R (float): Radius in solar units.
-        M (float): Mass in solar units.
-    
-    Returns:
-        tau (float): Granulation timescale in seconds.
-    """
-    
-    T_eff_sun = 5777  # Solar effective temperature in Kelvin
-    tau_sun = 200  # Solar granulation timescale in seconds (Reference from Bill)
-    
-    tau = tau_sun * (R**2 / M) * (T_eff / T_eff_sun)**(1/2)
-
-
-    #tau = tau_sun * (R**2/M) ** (7/9) * (T_eff_sun/T_eff) ** (23/9)  #method 2 from Basu and Chaplin, 2018
-    return tau 
-
-#---------------------------------------------------#
-
-def compute_sig_gran(T_eff, R, M):
-    """
-    Calculate the granulation amplitude (sigma_gran) in m/s using the scaling relation from Basu and Chaplin, 2018.
-    
-    Parameters:
-        T_eff (float): Effective temperature in Kelvin.
-        R (float): Radius in solar units.
-        M (float): Mass in solar units.
-    
-    Returns:
-        sigma_gran (float): Granulation amplitude in m/s.
-    """
-    
-    T_eff_sun = 5777  # Solar effective temperature in Kelvin
-    sigma_gran_sun = 0.8  # Solar granulation amplitude in m/s Meunier et al. 2015 (https://www.aanda.org/articles/aa/abs/2015/11/aa25721-15/aa25721-15.html) 
-    R_sun = M_sun = 1  # Solar radius and mass in solar units
-    
-    #assuming convective velocity (v_c) ∝ sound speed (c_s)
-    sigma_gran = sigma_gran_sun * (T_eff/T_eff_sun)**(3/2) * (R/R_sun) * (M/M_sun)**(-1) 
-    
-    #assuming v_c ∝ M_c * c_s
-    #sigma_gran = sigma_gran_sun * (T_eff/T_eff_sun)**(41/9) * (R/R_sun)**(13/9) * (M/M_sun)**(-11/9) 
-     
-    return sigma_gran
-
-#---------------------------------------------------#
-
-def create_config_file(ID, tau, sig_gran, subfolder, **kwargs):
+def create_config_file(ID, subfolder, **kwargs):
     """
     Creates a customizable configuration file named '{ID}.in' in the specified subfolder.
 
@@ -475,16 +410,16 @@ def create_config_file(ID, tau, sig_gran, subfolder, **kwargs):
     """
 
     # Ensure the subfolder exists
-    create_dir(ID, base_path=subfolder)
+    os.makedirs(subfolder, exist_ok=True)
 
-    # Define default configuration parameters (Solar-like star)
+    # Define default configuration parameters (Sun)
     config_params = {
         'user_seed': '225618852',
         'cadence': '1d0',                 # Cadence of 1 second.
         'n_cadences': '6220800',          # Total number of time steps in the time series (72 days at 1 second cadence).
-        'sig': f'{sig_gran}d0',                    # Typical solar granulation amplitude.
+        'sig': '60d0',                    # Typical solar granulation amplitude.
         'rho': '0d0',                     # Correlation coefficient for red noise model (0 for no correlation).    
-        'tau': f'{tau}d0',                   # Timescale for granulation in seconds.    
+        'tau': '250d0',                   # Typical solar timescale for granulation in seconds.    
         'n_relax': '86400d0',             # Number of relaxation steps before collecting data (1 day).
         'n_fine': '50',                   # Resolution factor for interpolation of model signals with periods = 0.143s or freq = 7 mHz.
         'inclination': '90d0',            # Edge on observation assumed.
@@ -537,16 +472,11 @@ def create_config_file(ID, tau, sig_gran, subfolder, **kwargs):
 
     #print(f"Configuration file '{infile_path}' created.")
 
-#---------------------------------------------------#
-
-def process_single_realisation(i, ID, N, M_samples, T_samples, R_samples, L_samples, numax_samples, dnu_samples, NU_GRID, base_path=".",**config_overrides  # Optional configuration overrides for the .in file
+def process_single_realisation(i, ID, N, M_samples, T_samples, L_samples, numax_samples, dnu_samples, NU_GRID,**config_overrides  # Optional configuration overrides for the .in file
 ):
-    # Create the full star folder and subfolder paths
+    # Create a unique ID and subfolder for this realisation
     this_ID = f"{ID}_MC_{i+1}"
-    star_folder = os.path.join(base_path, ID)
-    subfolder = os.path.join(star_folder, f"MC_{i+1}")
-
-    # Ensure directories exist
+    subfolder = os.path.join(ID, f"MC_{i+1}")
     os.makedirs(subfolder, exist_ok=True)
 
     # Generate oscillation modes using the stellar model
@@ -588,9 +518,7 @@ def process_single_realisation(i, ID, N, M_samples, T_samples, R_samples, L_samp
 
     # Create the configuration file for this realisation
     create_config_file(
-        ID=this_ID, 
-        tau=compute_tau(T_samples[i], R_samples[i], M_samples[i]),
-        sig_gran=compute_sig_gran(T_samples[i], R_samples[i], M_samples[i]),
+        ID=this_ID,
         subfolder=subfolder,
         user_seed=str(user_seed),
         **config_overrides  # Allows user to override any config values
@@ -599,25 +527,18 @@ def process_single_realisation(i, ID, N, M_samples, T_samples, R_samples, L_samp
     # Print progress
     #print(f"[{ID}] Realisation {i+1}/{N} saved in {subfolder}")
 
-#----------------------------------------------------#
 def numax(M, R, T_eff):
     numax_solar = 3050.0
     T_eff_solar = 5777.0
-    return M * R**(-2) * (T_eff/T_eff_solar)**(-0.5) * numax_solar
-  
-#----------------------------------------------------#
+    return M * R**-2 * (T_eff/T_eff_solar)**-0.5 * numax_solar
   
 def dnu(M, R):
     dnu_solar = 135.0 
     return M**0.5 / R**(3/2) * dnu_solar
 
-#---------------------------------------------------#
-
 def radius(T_eff, L):
     T_eff_solar = 5777.0
     return (L**0.5) * (T_eff / T_eff_solar)**(-2)
-
-#---------------------------------------------------#
 
 def sample_truncated_normal(mean, std, N):
     # Set bounds
@@ -626,9 +547,7 @@ def sample_truncated_normal(mean, std, N):
 
     return np.random.uniform(low=lower, high=upper, size=N)
 
-#---------------------------------------------------#
-
-def monte_carlo(index, sample_file, N, NU_GRID,base_path, **config_overrides):
+def monte_carlo(index, sample_file, N, NU_GRID, **config_overrides):
     sample = pd.read_csv(sample_file)
     row = sample.loc[index]
     ID = row['primary_name']
@@ -676,37 +595,27 @@ def monte_carlo(index, sample_file, N, NU_GRID,base_path, **config_overrides):
         "dnu": dnu_samples
     })
 
-    main_folder = os.path.join(base_path, ID)
+    main_folder = ID
     os.makedirs(main_folder, exist_ok=True)
     csv_path = os.path.join(main_folder, f"{ID}_MC_parameters.csv")
     params_df.to_csv(csv_path, index=False)
 
-
     # Run parallel realisations
-    if __name__ == "__main__":
-        config_overrides["base_path"] = base_path
-        with ProcessPoolExecutor(max_workers=8) as executor:
-            futures = [
-                executor.submit(
-                    process_single_realisation,
-                    i, ID, N,
-                    M_samples=M_samples,
-                    T_samples=T_samples,
-                    R_samples=R_samples,
-                    L_samples=L_samples,
-                    numax_samples=numax_samples,
-                    dnu_samples=dnu_samples,
-                    NU_GRID=NU_GRID,
-                    **config_overrides
-                )
-                for i in range(N)
-            ]
-            for future in futures:
-                future.result()
+    with ProcessPoolExecutor(max_workers=8) as executor:
+        futures = [
+            executor.submit(
+                process_single_realisation,
+                i, ID, N,
+                M_samples, T_samples, L_samples,
+                numax_samples, dnu_samples, NU_GRID,
+                **config_overrides
+            )
+            for i in range(N)
+        ]
+        for future in futures:
+            future.result()
 
-#---------------------------------------------------#
-
-def load_star_data(sample, star_index, mc_index, base_path):
+def load_star_data(sample, star_index, mc_index):
     """
     Load star data from CSV and .con files.
     
@@ -731,11 +640,10 @@ def load_star_data(sample, star_index, mc_index, base_path):
     ID = f"{ID_base}_MC_{mc_index}"
     
     # File paths
-    folder = os.path.join(base_path, ID_base, f"MC_{mc_index}")  # points to /Aa_test/HD16160/MC_1
-    file_path1 = os.path.join(folder, f"{ID}_PSD.csv")           # HD16160_MC_1_PSD.csv
-    file_path2 = os.path.join(folder, f"{ID}.con")               # HD16160_MC_1.con
-    mc_params_file = os.path.join(base_path,ID_base, f"{ID_base}_MC_parameters.csv")  # HD16160_MC_parameters.csv
-
+    folder = f"./{ID_base}/MC_{mc_index}"
+    mc_params_file = f"./{ID_base}/{ID_base}_MC_parameters.csv"
+    file_path1 = os.path.join(folder, f"{ID}_PSD.csv")
+    file_path2 = os.path.join(folder, f"{ID}.con")
     
     # Check if files exist
     if not os.path.exists(file_path1):
@@ -781,8 +689,6 @@ def load_star_data(sample, star_index, mc_index, base_path):
     
     return data
 
-#---------------------------------------------------#
-
 def plot_oscillation_modes(data, xlim=(0, 10000), figsize=(10, 6), fontsize=16):
     """
     Plot oscillation modes (PSD).
@@ -807,8 +713,6 @@ def plot_oscillation_modes(data, xlim=(0, 10000), figsize=(10, 6), fontsize=16):
     plt.tight_layout()
     plt.show()
     
-#---------------------------------------------------#
-
 def plot_linewidth_vs_frequency(data, figsize=(10, 6),fontsize=16):
     """
     Plot mode width vs scaled frequency.
@@ -832,8 +736,6 @@ def plot_linewidth_vs_frequency(data, figsize=(10, 6),fontsize=16):
     plt.tight_layout()
     plt.show()
     
-#---------------------------------------------------#
-
 def epanechnikov_weights(size=5):
     """Generate normalized Epanechnikov kernel weights."""
     
@@ -845,16 +747,12 @@ def epanechnikov_weights(size=5):
     weights /= weights.sum()  # normalize
     return weights
 
-#---------------------------------------------------#
-
 def smooth_epanechnikov(y, window_size=9):
     """Apply Epanechnikov kernel smoothing to a 1D array."""
     
     weights = epanechnikov_weights(window_size)
     # Use 'same' to keep original length, and mode='reflect' to handle edges smoothly
     return np.convolve(y, weights, mode='same')
-
-#---------------------------------------------------#
 
 def plot_amplitudes_by_degree(data,figsize=(10, 6), fontsize=16, smooth=True, window_size=9):
     """ Plot RMS amplitudes by degree (l value).
@@ -899,8 +797,6 @@ def plot_amplitudes_by_degree(data,figsize=(10, 6), fontsize=16, smooth=True, wi
     plt.legend()
     plt.tight_layout()
     plt.show()
-
-#---------------------------------------------------#
 
 def plot_echelle_diagram(data, figsize=(10, 6), fontsize=16):
     """
@@ -1006,9 +902,7 @@ def plot_echelle_diagram(data, figsize=(10, 6), fontsize=16):
     
     return results
 
-#---------------------------------------------------#
-
-def analyze_star(sample, star_index, mc_index, base_path, xlim=(0, 10000), figsize=(10, 6)):
+def analyze_star(sample, star_index=12, mc_index=45, xlim=(0, 10000), figsize=(10, 6)):
     """
     Complete analysis workflow for a single star.
     
@@ -1017,9 +911,9 @@ def analyze_star(sample, star_index, mc_index, base_path, xlim=(0, 10000), figsi
     sample : pandas.DataFrame
         DataFrame containing star information
     star_index : int
-        Index of the star to select
+        Index of the star to select (default: 12)
     mc_index : int
-        MC realisation number
+        MC realisation number (default: 45)
     xlim : tuple
         X-axis limits for oscillation modes plot (default: (0, 10000))
     figsize : tuple
@@ -1034,7 +928,7 @@ def analyze_star(sample, star_index, mc_index, base_path, xlim=(0, 10000), figsi
     """
     
     # Load data
-    data = load_star_data(sample, star_index, mc_index, base_path)
+    data = load_star_data(sample, star_index, mc_index)
     
     # Generate all plots
     plot_oscillation_modes(data, xlim)
@@ -1043,8 +937,6 @@ def analyze_star(sample, star_index, mc_index, base_path, xlim=(0, 10000), figsi
     echelle_results = plot_echelle_diagram(data, figsize)
     
     return data, echelle_results
-
-#---------------------------------------------------#
 
 def run_aadg3_single(ID, base_path, aadg3_path, j):
     """
@@ -1070,8 +962,6 @@ def run_aadg3_single(ID, base_path, aadg3_path, j):
     except Exception as ex:
         print(f"[!] AADG3 run for {ID} MC_{j+1} error: {ex}")
             
-#---------------------------------------------------#
-
 def run_all_realisations_parallel(ID, base_path, aadg3_path, N):
     #max_threads = min(multiprocessing.cpu_count(), N)  # Don't spawn more processes than realisations
     with ThreadPoolExecutor(max_workers=8) as executor:
@@ -1079,8 +969,6 @@ def run_all_realisations_parallel(ID, base_path, aadg3_path, N):
         for future in futures:
             future.result()
     
-#---------------------------------------------------#
-
 def plot_synthetic_time_series(sample, index, realisation, base_path, fontsize=16):
     """
     Plot the synthetic time series for a given star and realisation.
@@ -1109,7 +997,7 @@ def plot_synthetic_time_series(sample, index, realisation, base_path, fontsize=1
     n_points = len(flux)
     time = np.arange(n_points) * cadence
     
-        # Determine dynamic y-axis limits (110% of variation)
+    # Determine dynamic y-axis limits (110% of variation)
     y_min, y_max = np.min(flux), np.max(flux)
     y_center = 0.5 * (y_min + y_max)
     y_range = (y_max - y_min) * 0.55  # half of 110%
@@ -1129,10 +1017,6 @@ def plot_synthetic_time_series(sample, index, realisation, base_path, fontsize=1
 
 
     return ID
-
-#---------------------------------------------------#
-
-import numpy as np
 
 def process_realisation_star(filepath, ints, T_fixed):
     """
@@ -1168,9 +1052,6 @@ def process_realisation_star(filepath, ints, T_fixed):
         std_dev.append(seg_means.std())
 
     return np.array(std_dev)
-
-
-#---------------------------------------------------#
 
 def find_numax(ints, std_dev, order=4):
     """
@@ -1224,8 +1105,6 @@ def find_numax(ints, std_dev, order=4):
     min_x_uHz = 1 / (min_x_mins * 60) * 1e6
 
     return min_x_uHz, min_x_mins, coeffs, (x_win, y_win)
-
-#------------------------------------------#
 
 def analyze_all_realisations(star_folder, ints, T_fixed, max_realisations=None):
     """
@@ -1296,8 +1175,6 @@ def analyze_all_realisations(star_folder, ints, T_fixed, max_realisations=None):
 
     folder_name = os.path.basename(star_folder.rstrip("/"))
     save_path = os.path.join(star_folder, f"{folder_name}.npz")
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
 
     # Save all results in compressed .npz file
     np.savez_compressed(
@@ -1314,8 +1191,6 @@ def analyze_all_realisations(star_folder, ints, T_fixed, max_realisations=None):
 
     print(f"Used {used_count} realisations. Skipped {skipped_count}.")
     print(f"Saved results to {save_path}")
-
-#---------------------------------------------------#
 
 def plot_from_npz(npz_path, fontsize=16):
     """
@@ -1371,15 +1246,11 @@ def plot_from_npz(npz_path, fontsize=16):
     plt.tight_layout()
     plt.show()
 
-#---------------------------------------------------#
-
 def read_cadence_from_infile(filepath):
     with open(filepath, 'r') as f:
         for line in f:
             if 'cadence' in line:
                 return float(line.split('=')[1].split()[0].replace('d0', ''))
-
-#---------------------------------------------------#
 
 def run_analysis(
     sample,
@@ -1438,7 +1309,7 @@ def run_analysis(
     star_index = sample[sample['primary_name'] == star_name].index[0]
 
     # Load star data for this MC realisation
-    data = load_star_data(sample, star_index, mc_index, base_path)
+    data = load_star_data(sample, star_index, mc_index)
     echelle_results = None
 
     if generate_oscillation:
@@ -1465,8 +1336,6 @@ def run_analysis(
         "data": data,
         "echelle_results": echelle_results
     }
-
-#---------------------------------------------------#
 
 def get_rms_for_time(npz_path, exposure_time_min=None, fontsize=16):
     """
@@ -1533,9 +1402,6 @@ def get_rms_for_time(npz_path, exposure_time_min=None, fontsize=16):
     plt.legend()
     plt.tight_layout()
     plt.show()
-
-#---------------------------------------------------#
-
 
 def get_time_for_rms(npz_path, target_rms, show_plot=True, figsize=(10, 6), fontsize=16):
     """
@@ -1658,10 +1524,6 @@ def get_time_for_rms(npz_path, target_rms, show_plot=True, figsize=(10, 6), font
 
     return crossings, time_band_errors
 
-#---------------------------------------------------#
-
-import numpy as np
-
 def time_series_properties(nu_grid):
     """
     Given a frequency grid in μHz, compute the time series length and cadence in seconds.
@@ -1693,7 +1555,4 @@ def time_series_properties(nu_grid):
     cadence_sec = 1 / (2 * nu_max_hz)
 
     return time_length_sec, cadence_sec
-
-
-
 
