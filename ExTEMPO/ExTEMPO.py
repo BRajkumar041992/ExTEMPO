@@ -1046,6 +1046,7 @@ def run_aadg3_single(ID, base_path, aadg3_path, j):
     
     star_dir = os.path.join(base_path, ID)
     star_dir_2 = os.path.join(star_dir, f"MC_{j+1}")
+    os.makedirs(star_dir_2, exist_ok=True)
     input_file = f"{ID}_MC_{j+1}.in"
 
     try:
