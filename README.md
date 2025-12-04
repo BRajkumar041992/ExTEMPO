@@ -6,16 +6,12 @@ For Sun-like stars, P-mode oscillations occur over a narrow frequency range. The
 
 **Exposure Time Evaluation for Mitigation of P-mode Oscillations (ExTEMPO)**
 
-<img src="ExTEMPO_logo.png" alt="Logo" width="200"/>
-
-
-
 ExTEMPO is a tool which can be used to develop a p-mode mitigation strategy by optimising the exposure times of radial velocity observations. It uses the stellar parameters such as mass, effective temperature, and log luminosity to determine the P-mode rms amplitude at different exposure times for solar-like stars (F, G and K stars). ExTEMPO utilises stellar scaling relations and contributions taken from Kjeldsen & Bedding (1994), White et al. (2011), Mosser et al. (2013), Ball et al. (2018) and Nielson et al. (2021), to model the PSD of the p-mode oscillations. The mode data is then fed to the AsteroFLAG Artificial Dataset Generator 3 (AADG3), which simulates a radial velocity time series. The time series is then integrated to obtain the rms amplitude at different exposure times. Monte Carlo (MC) sampling of the input parameters is used to generate multiple realisations of the target star. Each realisation is processed as previously described, producing a distribution of rms amplitude curves from which a one-sigma error is obtained.
 
 
-ExTEMPO is in active development, so please report any issues or suggestions on GitHub (https://github.com/BRajkumar041992). The latest version is currently available as a Python module (ExTEMPO_v2_0) from the GitHub repository. 
+ExTEMPO is in active development, so please report any issues or suggestions on GitHub (https://github.com/BRajkumar041992). The latest version is currently available as a Python module (ExTEMPO_v3_1) from the GitHub repository. 
 
-To run ExTEMPO, please make sure the following packages are preinstalled.
+To run ExTEMPO, ensure the following packages are preinstalled.
 
 matplotlib, numpy, pandas, scipy, and ADDG3 (https://warrickball.gitlab.io/AADG3/index.html#)
 
@@ -24,24 +20,24 @@ ExTEMPO also requires a CSV file containing target stars and their stellar and a
 First, install the package using "pip install git+https://github.com/BRajkumar041992/ExTEMPO.git"
 Next, open the ExTEMPO_example.ipynb file. This contains an example for using ExTEMPO.  
 
-The 3rd cell requires user input. A description of each input is included. Once inputs have been defined, the 4th cell runs the code, which will generate a folder for the target star, subfolders for each MC realisation and a MC_parameters.csv file containing the sampled parameters for each realisation. Each subfolder will contain:
+The 3rd cell requires user input. A description of each input is included. Once inputs have been defined, the 4th cell runs the functions, which will generate a folder for the target star, subfolders for each MC realisation and an MC_parameters.csv file containing the sampled parameters for each realisation. Each subfolder will contain:
 
 - a PSD.csv file, which contains the data for the generated power spectral density.
 - .con and .in files, which are the generated inputs for ADDG3. The .con file also contains the mode amplitude, frequency and widths, which are used to generate various plots in the 5th cell.
 - a .asc file, the output of ADDG3, which contains the simulated time series.
 - a .npz file, which contains the rms amplitudes and exposure times for each realisation, the mean rms amplitude plot and its errors.
 
-This stores between 8-10 GB of data per star. (Future updates will include an option to only save the final results.)
+This stores between 0.5 - 1.5 GB of data per star for 100 realisations. (Future updates will include an option to only save the final results.)
 
-Cell 5 provides the option to plot:
+Cell 4 provides the option to plot:
 
 - The PSD for one MC realisation,
 - the mode/line width vs radial order for one MC realisation,
 - the mode amplitude vs radial order for one MC realisation,
 - the echelle diagram for one MC realisation,
 - the synthetic time series generated from ADDG3 for one MC realisation,
-- The RMS amplitude plot with each realisation, the mean realisation, and the estimated nu_max.
+- The RMS amplitude plot with each realisation, the mean of all realisations, and the estimated nu_max.
 
 Each plot can be toggled on or off, and the user can define which MC realisation they would like to plot.
 
-Cell 6 allows the user to define a desired exposure time and target RMS amplitude. Cell 7 determines the RMS amplitude obtained at the defined exposure time and its associated error. It also produces a plot for visual inspection. Cell 8 determines all exposure times and their errors where the RMS amplitude curve crosses the user-defined target RMS amplitude. 
+Cell 5 allows the user to define a desired exposure time and target RMS amplitude. Cell 6 determines the RMS amplitude obtained at the specified exposure time and its associated error. It also produces a plot for visual inspection. Cell 7 determines all exposure times and their errors where the RMS amplitude curve crosses the user-defined target RMS amplitude. 
