@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="extempo",
-    version="2.0",
+    name="ExTEMPO",
+    version="3.1",
     description="ExTEMPO: A tool for simulating solar-like oscillations and power spectra",
     author="Brandon Rajkumar",
     author_email="Brandon.Rajkumar@warwick.ac.uk",
