@@ -104,17 +104,23 @@ def sample_truncated_gaussian(mean, err_minus, err_plus, N):
         Array of N sampled values.
     """
     
-    # Convert asymmetric errors to a single sigma
-    sigma = 0.5 * (err_minus + err_plus)
-    if sigma == 0:
+    # Handle zero error case
+    if err_minus == 0 and err_plus == 0:
         return np.full(N, mean, dtype=float)
     
-    # Draw normal samples from a gaussian distribution
-    samples = np.random.normal(loc=mean, scale=sigma, size=N)
-    # Enforce lower physical limit
+    # Convert asymmetric errors to a symmetric sigma
+    sigma = 0.5 * (err_minus + err_plus)
+    
+    # Calculate standardized truncation limits for truncnorm
+    a = -err_minus / sigma   # lower bound in std units
+    b =  err_plus / sigma    # upper bound in std units
+    
+    # Draw truncated Gaussian samples
+    samples = truncnorm.rvs(a, b, loc=mean, scale=sigma, size=N)
+    
+    # Optional: enforce a strict physical lower limit
     samples = np.maximum(samples, 1e-3)
     
-   
     return samples
 
 #----------------------------------------------------#
