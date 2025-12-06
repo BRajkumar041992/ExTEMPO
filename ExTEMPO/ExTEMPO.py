@@ -82,45 +82,80 @@ def time_series_properties(nu_grid):
 
 #--------------------------------#
 
-def sample_truncated_gaussian(mean, err_minus, err_plus, N):
+def sample_split_normal(mean, err_minus, err_plus, N):
     """
-    Draw N samples from a symmetric Gaussian centered on `mean` with sigma
-    derived from asymmetric errors, and impose a strict physical lower bound.
-    
+    Sample N values from a two-piece (split) normal distribution
+    with optional physical lower bound.
+
+    Distribution:
+        x < mean : Normal(mean, err_minus)
+        x > mean : Normal(mean, err_plus)
+
     Parameters
     ----------
     mean : float
-        Measured value (central estimate).
+        Central measured value.
+
     err_minus : float
-        Negative uncertainty (lower error).
+        1σ uncertainty on the lower side (mean - err_minus).
+
     err_plus : float
-        Positive uncertainty (upper error).
+        1σ uncertainty on the upper side (mean + err_plus).
+
     N : int
-        Number of samples to draw.
-    
+        Number of samples to generate.
+
+    lower_bound : float or None, optional
+        Physical lower limit (e.g., > 0). If None, no physical bound applied.
+
     Returns
     -------
     samples : ndarray
-        Array of N sampled values.
+        Array of shape (N,) containing the sampled values.
     """
+
+    rng = np.random.default_rng()
     
-    # Handle zero error case
+    # Force strictly positive lower bound to keep physical properties positive
+    lower_bound = 1e-12
+    
+    # Zero error = deterministic value
     if err_minus == 0 and err_plus == 0:
-        return np.full(N, mean, dtype=float)
-    
-    # Convert asymmetric errors to a symmetric sigma
-    sigma = 0.5 * (err_minus + err_plus)
-    
-    # Calculate standardized truncation limits for truncnorm
-    a = -err_minus / sigma   # lower bound in std units
-    b =  err_plus / sigma    # upper bound in std units
-    
-    # Draw truncated Gaussian samples
-    samples = truncnorm.rvs(a, b, loc=mean, scale=sigma, size=N)
-    
-    # Optional: enforce a strict physical lower limit
-    samples = np.maximum(samples, 1e-3)
-    
+        samples = np.full(N, mean)
+        if lower_bound is not None:
+            samples = np.maximum(samples, lower_bound)
+        return samples
+
+    sigma_L = max(err_minus, 1e-12)
+    sigma_R = max(err_plus, 1e-12)
+
+    # Probability mass on left branch
+    p_left = sigma_L / (sigma_L + sigma_R)
+
+    # Choose branch
+    u = rng.random(N)
+    left_mask  = u < p_left
+    right_mask = ~left_mask
+
+    samples = np.empty(N, dtype=float)
+
+    # Left side (below mean)
+    n_left = np.sum(left_mask)
+    if n_left > 0:
+        samples[left_mask] = mean - np.abs(rng.normal(0, sigma_L, size=n_left))
+
+    # Right side (above mean)
+    n_right = np.sum(right_mask)
+    if n_right > 0:
+        samples[right_mask] = mean + np.abs(rng.normal(0, sigma_R, size=n_right))
+
+    # Lower bound handling
+    mask = samples < lower_bound
+    if np.any(mask):
+        k = np.sum(mask)
+        # Redraw **only from the right-hand side** to stay above zero
+        samples[mask] = lower_bound + np.abs(rng.normal(0, sigma_R, size=k))
+
     return samples
 
 #----------------------------------------------------#
@@ -238,9 +273,9 @@ def monte_carlo(index, sample_file, N, base_path):
     sample_size = oversample_factor * N
 
     # Draw many more samples than needed to enable filtering later
-    M_all = sample_truncated_gaussian(M0, M_nunc, M_punc, sample_size)
-    T_all = sample_truncated_gaussian(T0, T_unc, T_unc, sample_size)
-    L_all = sample_truncated_gaussian(L0, L_nunc, L_punc, sample_size)
+    M_all = sample_split_normal(M0, M_nunc, M_punc, sample_size)
+    T_all = sample_split_normal(T0, T_unc, T_unc, sample_size)
+    L_all = sample_split_normal(L0, L_nunc, L_punc, sample_size)
 
     # ------------------------------------------------------------
     # 4. Compute derived stellar quantities for each sample
