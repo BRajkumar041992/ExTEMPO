@@ -13,7 +13,7 @@ ExTEMPO is in active development, so please report any issues or suggestions on 
 
 To run ExTEMPO, ensure the following packages are preinstalled.
 
-matplotlib, numpy, pandas, scipy, and ADDG3 (https://warrickball.gitlab.io/AADG3/index.html#)
+matplotlib, numpy, pandas, scipy, and ADDG3 (https://sasp.gitlab.io/AADG3/)
 
 ExTEMPO also requires a CSV file containing target stars and their stellar and asteroseismic parameters. The file should contain columns such as primary_name, Teff(K), Teff_err(K), Mass, Mass-err, Mass+err, logLuminosity, logLuminosity-err, logLuminosity+err. A sample file is provided on GitHub.
 
